@@ -15,7 +15,7 @@ BATCH_SIZE = 16
 MAX_TRAIN_IMAGES = 400
 
 
-def load_data(low_image_path, high_image_path):
+def loading_data(low_image_path, high_image_path):
     low_image = tf.io.read_file(low_image_path)
     low_image = tf.image.decode_png(low_image, channels=3)
     low_image = tf.image.resize(low_image, [IMAGE_SIZE, IMAGE_SIZE])
@@ -29,9 +29,9 @@ def load_data(low_image_path, high_image_path):
     return low_image, high_image
 
 
-def data_generator(low_light_images, high_light_images):
+def get_data(low_light_images, high_light_images):
     dataset = tf.data.Dataset.from_tensor_slices((low_light_images, high_light_images))
-    dataset = dataset.map(lambda x, y: load_data(x, y), num_parallel_calls=tf.data.AUTOTUNE)
+    dataset = dataset.map(lambda x, y: loading_data(x, y), num_parallel_calls=tf.data.AUTOTUNE)
     dataset = dataset.batch(BATCH_SIZE, drop_remainder=True)
     return dataset
 
@@ -41,11 +41,11 @@ val_low_light_images = sorted(glob("./train/low/*"))[MAX_TRAIN_IMAGES:]
 val_high_light_images = sorted(glob("./train/high/*"))[MAX_TRAIN_IMAGES:]
 test_low_light_images = sorted(glob("./test/low/*"))
 
+#generating data from the train folder as train_dataset and val_dataset.
+train_dataset = get_data(train_low_light_images, train_high_light_images)
+val_dataset = get_data(val_low_light_images, val_high_light_images)
 
-train_dataset = data_generator(train_low_light_images, train_high_light_images)
-val_dataset = data_generator(val_low_light_images, val_high_light_images)
-
-
+#making the EnlightenGAN model.
 class ConvBlock(layers.Layer):
     def __init__(self, filters, kernel_size=3, strides=1, padding="same", activation="relu"):
         super(ConvBlock, self).__init__()
@@ -95,9 +95,9 @@ def plot_result(item):
     plt.legend()
     plt.grid()
     plt.show()
-
+#plotting the losses over epochs.
 plot_result("loss")
-
+#saving our model.
 enlighten_gan.save("enlightengan_model.h5")
 
 def infer(original_image):
@@ -108,7 +108,7 @@ def infer(original_image):
     output_image = tf.cast((output_image[0, :, :, :] * 255), dtype=np.uint8)
     output_image = Image.fromarray(output_image.numpy())
     return output_image
-
+#getting images from test folder to get our predictions.
 test_low_light_images = sorted(glob("./test/low/*"))
 os.makedirs('./test/predicted/', exist_ok=True)
 
@@ -121,7 +121,7 @@ for img_path in test_low_light_images:
 
 
 from skimage.metrics import peak_signal_noise_ratio as psnr
-
+#calculating psnr
 def calculate_psnr(original, enhanced):
     original = np.array(original, dtype=np.float32)
     enhanced = np.array(enhanced, dtype=np.float32)
