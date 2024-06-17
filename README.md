@@ -1,7 +1,7 @@
 # Low Light Image Enhancing using EnlightenGAN
 
 ## Description
-This project implements a low light image enhancement algorithm using EnlightenGAN. The implementation and dataset are based on the methods and resources described in the following articles:
+This project implements a low light image enhancement algorithm using EnlightenGAN giving a peak signal to noise ration 16.94 . The implementation and dataset are based on the methods and resources described in the following articles:
 - [EnlightenGAN: Deep Light Enhancement without Paired Supervision](https://arxiv.org/pdf/1906.06972v2)
 - [Learning to Enhance Low-Light Image via Zero-Reference Deep Curve Estimation](https://arxiv.org/pdf/2112.14022)
 
